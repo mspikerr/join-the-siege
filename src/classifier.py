@@ -1,31 +1,9 @@
-# from src.utils.pdf_extraction import extract_text_from_pdf
-# from src.utils.ocr import extract_text_from_image
-# from src.utils.file_type_detection import get_mime_type
-# from src.utils.text_classification import classify_text
-# from werkzeug.datastructures import FileStorage
-
-
-
-# def classify_file(file: FileStorage):
-#     filename = file.filename.lower()
-#     file_bytes = file.read()
-#     mime_type = get_mime_type(file_bytes)
-
-#     if mime_type == "application/pdf":
-#         text = extract_text_from_pdf(file_bytes)
-#     elif mime_type.startswith("image/"):
-#         text = extract_text_from_image(file_bytes)
-#     else:
-#         return "unsupported format"
-
-#     return classify_text(text)
-
-
 from werkzeug.datastructures import FileStorage
 from pdfminer.high_level import extract_text
 from docx import Document
 import openpyxl
 from PIL import Image
+from rapidfuzz import fuzz
 import pytesseract
 import magic
 import io
@@ -70,17 +48,37 @@ def extract_text_from_xlsx(file_bytes):
             text += " ".join([str(cell) for cell in row if cell]) + "\n"
     return text
 
+def fuzzy_match(text, keyword, threshold=80):
+    score = fuzz.token_set_ratio(text, keyword)
+    #print(f"Comparing: '{text}' <-> '{keyword}' => {score}")
+    return score >= threshold
+
 def classify_text(text):
     text = text.lower()
-    if "drivers license" in text or "driver's license" in text:
-        print("not ML: drivers")
-        return "drivers_licence"
-    if "bank account" in text or "statement" in text:
-        print("not ML: bank statement")
-        return "bank_statement"
-    if "invoice" in text or "amount due" in text:
-        print("not ML: invoice")
-        return "invoice"
+
+    driver_keywords = ["driver's license", "drivers license", "dl no"]
+    bank_keywords = ["bank statement", "account balance", "transaction summary", "monthly statement"]
+    invoice_keywords = ["invoice", "amount due", "services rendered", "total amount"]
+
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        print("LINE: ", line)
+        for kw in driver_keywords:
+            if fuzzy_match(line, kw):
+                print("fuzzy: drivers")
+                return "drivers_license"
+        for kw in bank_keywords:
+            if fuzzy_match(line, kw):
+                print("fuzzy: bank statement")
+                return "bank_statement"
+        for kw in invoice_keywords:
+            if fuzzy_match(line, kw):
+                print("fuzzy: invoice")
+                return "invoice"
+
+    print("no fuzzy match, returning unknown")
     return "unknown file"
 
 def ml_classify_text(text):
@@ -97,6 +95,7 @@ def classify_file(file: FileStorage):
         text = extract_text_from_pdf(file_bytes)
     elif mime_type.startswith("image/"):
         text = extract_text_from_image(file_bytes)
+        print("THIS IS WHAT OCR OUTPUTS:", text)
     elif filename.endswith(".docx"):
         text = extract_text_from_docx(file_bytes)
     elif filename.endswith(".xlsx"):

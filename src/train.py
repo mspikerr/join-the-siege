@@ -12,7 +12,11 @@ labels = []
 # Map folder names or file prefixes to labels
 for filename in os.listdir(data_dir):
     if filename.endswith(".txt"):
-        label = filename.split("_")[0]  # invoice_1.txt -> 'invoice'
+        base_name = os.path.splitext(filename)[0]  # e.g., 'bank_statement_1'
+        if "_" in base_name:
+            label = "_".join(base_name.split("_")[:-1])  # Remove the trailing _#
+        else:
+            label = base_name
         filepath = os.path.join(data_dir, filename)
         with open(filepath, "r", encoding="utf-8") as f:
             texts.append(f.read())
@@ -27,10 +31,13 @@ clf = MultinomialNB()
 clf.fit(X, labels)
 
 # Save the model and vectorizer to disk
-with open("model.pkl", "wb") as f:
+model_dir = os.path.join("src", "models")
+os.makedirs(model_dir, exist_ok=True)
+
+with open(os.path.join(model_dir, "model.pkl"), "wb") as f:
     pickle.dump(clf, f)
 
-with open("vectorizer.pkl", "wb") as f:
+with open(os.path.join(model_dir, "vectorizer.pkl"), "wb") as f:
     pickle.dump(vectorizer, f)
 
-print("✅ Model and vectorizer saved as model.pkl and vectorizer.pkl")
+print("✅ Model and vectorizer saved to src/models/")
