@@ -9,18 +9,15 @@ data_dir = "sample_docs"
 texts = []
 labels = []
 
-# Map folder names or file prefixes to labels
-for filename in os.listdir(data_dir):
-    if filename.endswith(".txt"):
-        base_name = os.path.splitext(filename)[0]  # e.g., 'bank_statement_1'
-        if "_" in base_name:
-            label = "_".join(base_name.split("_")[:-1])  # Remove the trailing _#
-        else:
-            label = base_name
-        filepath = os.path.join(data_dir, filename)
-        with open(filepath, "r", encoding="utf-8") as f:
-            texts.append(f.read())
-            labels.append(label)
+# Walk through all subdirectories
+for root, _, files in os.walk(data_dir):
+    for file in files:
+        if file.endswith(".txt"):
+            file_path = os.path.join(root, file)
+            label = os.path.basename(root)  # Use the folder name as the label
+            with open(file_path, "r", encoding="utf-8") as f:
+                texts.append(f.read())
+                labels.append(label)
 
 # Convert text data to TF-IDF vectors
 vectorizer = TfidfVectorizer()
