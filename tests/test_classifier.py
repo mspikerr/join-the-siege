@@ -3,7 +3,7 @@ from src.classifier import classify_text, ml_classify_text
 
 @pytest.mark.parametrize("text,expected", [
     ("This is an invoice with amount due", "invoice"),
-    ("Driver's License #XYZ123", "drivers_licence"),
+    ("Driver's License #XYZ123", "drivers_license"),
     ("Statement for bank account", "bank_statement"),
     ("Random content with no keywords", "unknown file")
 ])
