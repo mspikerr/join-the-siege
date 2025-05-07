@@ -32,7 +32,7 @@ import io
 import pickle
 import os
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Tesseract\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
 #TO DO: print statement to see if its actually falling back to ML
 # Load ML model and vectorizer
