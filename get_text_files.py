@@ -53,4 +53,4 @@ for category, texts in categories.items():
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(text)
 
-print("✅ Sample documents written to 'sample_docs/<category>/' folders.")
+print("Sample documents written to 'sample_docs/<category>/' folders.")

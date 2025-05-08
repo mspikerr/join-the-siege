@@ -3,7 +3,6 @@ import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
-# Path to your sample documents
 data_dir = "training_docs"
 
 texts = []
@@ -37,4 +36,4 @@ with open(os.path.join(model_dir, "model.pkl"), "wb") as f:
 with open(os.path.join(model_dir, "vectorizer.pkl"), "wb") as f:
     pickle.dump(vectorizer, f)
 
-print("✅ Model and vectorizer saved to src/models/")
+print("Model and vectorizer saved to src/models/")

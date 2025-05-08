@@ -1,13 +1,79 @@
-# Document Classifier 🧠📄
+# Document Classifier
 
 ![Python CI](https://github.com/mspikerr/join-the-siege/actions/workflows/python-ci.yml/badge.svg)
 [![Render](https://img.shields.io/badge/deployed-on%20Render-00c7d4)](https://document-classifier-b3k7.onrender.com)
 
 A Flask-based document classification app with ML and OCR support.
 
+## Running with Docker
+
+You can also run the application using Docker. Ensure you have Docker installed on your system.
+
+1.  **Build the Docker image**:
+
+    Navigate to the root directory of the project (where the `Dockerfile` is located) and run:
+
+    ```bash
+    docker build -t document-classifier .
+    ```
+
+    * `-t document-classifier`: This tags the image with the name "document-classifier".
+    * `.`: This specifies that the build context is the current directory.
+
+2.  **Run the Docker container**:
+
+    To run the built image and map the application's port (5000) to your host machine's port 5000, use:
+
+    ```bash
+    docker run -p 5000:5000 document-classifier
+    ```
+
+    * `-p 5000:5000`: This maps the host's port 5000 to the container's port 5000.
+
+Visit `http://localhost:5000` in your browser to access the application.
+
+**Using `curl` to test the `/classify_file` endpoint from your host machine**:
+
+Assuming you have a file named `example.pdf` in your current directory:
+
+```bash
+curl -F "file=@example.pdf" http://localhost:5000/classify_file
+
+**Using `curl` to add a category from your host machine**:
+
+Assuming you have text files named `contract_example1.txt` and `contract_example2.txt` in your current directory:
+
+```bash
+curl -X POST http://localhost:5000/add_category \
+  -F "category_name=Contract" \
+  -F 'keywords=["agreement", "terms", "signature", "clause"]' \
+  -F "files=@contract_example1.txt" \
+  -F "files=@contract_example2.txt"
 
 
+## 🌐 Deployment on Render
 
+This application is deployed on Render and can be accessed at: [https://document-classifier-b3k7.onrender.com](https://document-classifier-b3k7.onrender.com).
+
+Please note that this deployment might experience slower initial loading times due to the free tier. Performance with larger files may also be limited.
+
+Future improvements to the deployment strategy are discussed in the "Future Considerations" section.
+
+---
+
+## 🔮 Future Considerations
+
+Here are some potential areas for future development:
+
+-   **Improved Machine Learning Model**: Explore more advanced NLP models for better classification accuracy.
+-   **More File Type Support**: Investigate support for additional document and image formats.
+-   **User Interface Enhancements**: Improve the web UI for a more intuitive user experience.
+-   **Scalability**: Implement features to handle a larger volume of documents and user requests more efficiently.
+-   **Deployment Improvements**: Explore more robust and scalable deployment options beyond the Render free tier (as mentioned earlier), such as cloud platforms with better resource management.
+-   **User Authentication**: Add user accounts and authentication for managing categories and data.
+-   **More Granular Keyword Control**: Allow users to specify the matching sensitivity for keywords.
+
+---
 
 
 

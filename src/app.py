@@ -14,7 +14,7 @@ TRAINING_DIR = "training_docs"
 @app.route("/add_category", methods=["POST"])
 def add_category():
     category_name = request.form["category_name"]
-    keywords = json.loads(request.form["keywords"])  # Expecting a JSON string list
+    keywords = json.loads(request.form["keywords"])
     files = request.files.getlist("files")
 
     # Save keywords
