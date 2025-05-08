@@ -31,7 +31,8 @@
       margin-bottom: 20px;
     }
 
-    input[type="file"] {
+    input[type="file"],
+    input[type="text"] {
       margin-bottom: 10px;
       padding: 10px;
       background-color: #f4f7f6;
@@ -80,6 +81,19 @@
     .success {
       color: green;
     }
+
+    .category-form {
+      margin-top: 30px;
+    }
+
+    .category-form input[type="text"] {
+      width: 100%;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -87,15 +101,16 @@
   <h1>File Classifier</h1>
 
   <div class="container">
+    <!-- File Classifier Form -->
     <h2>Upload Files to Classify</h2>
     <form action="/classify_file" method="post" enctype="multipart/form-data">
       <div class="file-inputs">
         <input type="file" name="file" multiple required>
       </div>
-
       <button type="submit">Upload and Classify</button>
     </form>
 
+    <!-- Results Section -->
     {% if results %}
       <div class="results">
         <h3>Classification Results:</h3>
@@ -112,7 +127,50 @@
         </ul>
       </div>
     {% endif %}
+
+    <!-- Add New Category Form -->
+    <div class="category-form">
+      <h2>Add a New Category</h2>
+      <form id="addCategoryForm" method="post" enctype="multipart/form-data">
+        <label for="category_name">Category Name:</label>
+        <input type="text" id="category_name" name="category_name" required><br><br>
+
+        <label for="keywords">Keywords (JSON format, e.g. ["alpha", "beta"]):</label>
+        <input type="text" id="keywords" name="keywords" required><br><br>
+
+        <label for="files">Upload .txt Files for Training:</label>
+        <input type="file" name="files" accept=".txt" multiple><br><br>
+
+        <button type="submit">Add Category</button>
+      </form>
+
+      <div id="message" class="success"></div>
+    </div>
+
   </div>
+
+  <script>
+    document.getElementById('addCategoryForm').onsubmit = async function(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("/add_category", {
+          method: "POST",
+          body: formData
+        });
+
+        const text = await response.text();
+        document.getElementById("message").textContent = text;
+        form.reset();  // optional: clear the form
+      } catch (err) {
+        document.getElementById("message").textContent = "Error submitting form.";
+        document.getElementById("message").className = "error";
+      }
+    };
+  </script>
 
 </body>
 </html>

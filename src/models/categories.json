@@ -1,0 +1,6 @@
+{
+    "drivers_license": ["driver's license", "drivers license", "dl no"],
+    "bank_statement": ["bank statement", "account balance", "transaction summary", "monthly statement"],
+    "invoice": ["invoice", "amount due", "services rendered", "total amount"]
+  }
+  

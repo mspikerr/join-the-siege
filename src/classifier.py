@@ -1,3 +1,5 @@
+import json
+import os
 from werkzeug.datastructures import FileStorage
 from pdfminer.high_level import extract_text
 from docx import Document
@@ -8,7 +10,6 @@ import pytesseract
 import magic
 import io
 import pickle
-import os
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
@@ -16,11 +17,25 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "model.pkl")
 VECTORIZER_PATH = os.path.join(BASE_DIR, "models", "vectorizer.pkl")
+CATEGORY_FILE = os.path.join(BASE_DIR, "models", "categories.json")
 
 with open(MODEL_PATH, "rb") as f:
     model = pickle.load(f)
 with open(VECTORIZER_PATH, "rb") as f:
     vectorizer = pickle.load(f)
+
+def load_categories():
+    """Load categories and their keywords from categories.json."""
+    with open(CATEGORY_FILE, "r") as f:
+        categories = json.load(f)
+    return categories
+
+def save_category(name, keywords):
+    """Save a new category to the categories.json file."""
+    categories = load_categories()
+    categories[name] = keywords
+    with open(CATEGORY_FILE, "w") as f:
+        json.dump(categories, f, indent=4)
 
 def extract_text_from_pdf(file_bytes):
     with open("temp.pdf", "wb") as f:
@@ -49,32 +64,19 @@ def extract_text_from_xlsx(file_bytes):
 
 def fuzzy_match(text, keyword, threshold=80):
     score = fuzz.token_set_ratio(text, keyword)
-    #print(f"Comparing: '{text}' <-> '{keyword}' => {score}")
     return score >= threshold
 
 def classify_text(text):
     text = text.lower()
 
-    driver_keywords = ["driver's license", "drivers license", "dl no"]
-    bank_keywords = ["bank statement", "account balance", "transaction summary", "monthly statement"]
-    invoice_keywords = ["invoice", "amount due", "services rendered", "total amount"]
+    categories = load_categories()
 
-    for line in text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        for kw in driver_keywords:
-            if fuzzy_match(line, kw):
-                print("fuzzy match drivers")
-                return "drivers_license"
-        for kw in bank_keywords:
-            if fuzzy_match(line, kw):
-                print("fuzzy match bank")
-                return "bank_statement"
-        for kw in invoice_keywords:
-            if fuzzy_match(line, kw):
-                print("fuzzy match invoice")
-                return "invoice"
+    # Iterate over categories and their keywords
+    for category, keywords in categories.items():
+        for keyword in keywords:
+            if any(fuzzy_match(line, keyword) for line in text.splitlines()):
+                print(f"fuzzy match {category}")
+                return category
 
     return "unknown file"
 
