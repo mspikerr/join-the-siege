@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
 # Path to your sample documents
-data_dir = "sample_docs"
+data_dir = "training_docs"
 
 texts = []
 labels = []
