@@ -13,7 +13,7 @@ Please note that this deployment might experience slower initial loading times d
 
 Future improvements to the deployment strategy are discussed in the "Future Considerations" section.
 
-## Running with Docker
+## Running with Docker (recommended)
 
 You can also run the application using Docker. Ensure you have Docker installed on your system.
 
