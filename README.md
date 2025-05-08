@@ -5,11 +5,28 @@
 
 A Flask-based document classification app with ML and OCR support.
 
+## Deployment on Render
+
+This application is deployed on Render and can be accessed at: [https://document-classifier-b3k7.onrender.com](https://document-classifier-b3k7.onrender.com).
+
+Please note that this deployment might experience slower initial loading times due to the free tier. Performance with larger files may also be limited. The preferred method is to run the app locally using Docker. Those steps are listed in the next section. 
+
+Future improvements to the deployment strategy are discussed in the "Future Considerations" section.
+
 ## Running with Docker
 
 You can also run the application using Docker. Ensure you have Docker installed on your system.
 
 1.  **Build the Docker image**:
+
+    Clone the repository:
+
+    ```bash
+    git clone https://github.com/mspikerr/join-the-siege
+    cd join-the-siege
+    ```
+
+2.  **Build the Docker image**:
 
     Navigate to the root directory of the project (where the `Dockerfile` is located) and run:
 
@@ -17,10 +34,7 @@ You can also run the application using Docker. Ensure you have Docker installed 
     docker build -t document-classifier .
     ```
 
-    * `-t document-classifier`: This tags the image with the name "document-classifier".
-    * `.`: This specifies that the build context is the current directory.
-
-2.  **Run the Docker container**:
+3.  **Run the app in the Docker container**:
 
     To run the built image and map the application's port (5000) to your host machine's port 5000, use:
 
@@ -28,40 +42,92 @@ You can also run the application using Docker. Ensure you have Docker installed 
     docker run -p 5000:5000 document-classifier
     ```
 
-    * `-p 5000:5000`: This maps the host's port 5000 to the container's port 5000.
+    Once the container is running, you have two ways to interact with the application:
 
-Visit `http://localhost:5000` in your browser to access the application.
+    ### a. Use the web interface (recommended)
 
-**Using `curl` to test the `/classify_file` endpoint from your host machine**:
+    Visit [http://localhost:5000](http://localhost:5000) in your browser to access the user-friendly upload and classification tool.
 
-Assuming you have a file named `example.pdf` in your current directory:
+    ### b. Use `curl` from the command line
 
-```bash
-curl -F "file=@example.pdf" http://localhost:5000/classify_file
-```
+    - **Classify a file**  
+      Assuming you have a file named `example.pdf` in your current directory:
 
-**Using `curl` to add a category from your host machine**:
+      ```bash
+      curl -F "file=@example.pdf" http://localhost:5000/classify_file
+      ```
 
-Assuming you have text files named `contract_example1.txt` and `contract_example2.txt` in your current directory:
+    - **Add a new category**  
+      Assuming you have text files named `contract_example1.txt` and `contract_example2.txt`:
 
-```bash
-curl -X POST http://localhost:5000/add_category \
-  -F "category_name=Contract" \
-  -F 'keywords=["agreement", "terms", "signature", "clause"]' \
-  -F "files=@contract_example1.txt" \
-  -F "files=@contract_example2.txt"
-  ```
+      ```bash
+      curl -X POST http://localhost:5000/add_category -F "category_name=Contract" -F 'keywords=["agreement", "terms", "signature", "clause"]' -F "files=@contract_example1.txt" -F "files=@contract_example2.txt"
+      ```
+
+    Make sure the files you're referencing exist in your current directory when running the `curl` commands.
+
+## Project Overview
+
+This project is a content-based document classification tool designed to automatically categorize uploaded files (PDFs, Word docs, text files, etc.) using a machine learning model trained on labeled text samples. This tool currently supports the following file types: PDF, PNG, JPG, TXT, DOCX, and XLSX. The application features a web interface and API endpoints that allow users to upload documents for classification, as well as extend the model by adding new categories with sample files and keywords. It is designed for rapid prototyping and easy deployment via Docker.
+
+### Classification Flow
+
+When a document is uploaded via the `/classify_file` endpoint, the classification process follows this flow:
+
+1. **Extract Text**  
+   The app extracts raw text content from the uploaded file using various file-type-aware methods. For PDF files, it uses the pdfminer library to extract text. For images, it utilizes OCR (Optical Character Recognition) with pytesseract to convert any text present in the image into machine-readable format. For .docx files, it reads the text from paragraphs using the python-docx library. For .xlsx files, it extracts text by reading the content of each cell in the spreadsheet using openpyxl. If the file is a plain text file, the raw content is directly decoded. This ensures that the system can process a variety of file types, including scanned images and different document formats.
+
+2. **Fuzzy Keyword Matching**  
+   It first attempts to classify the document by matching the extracted text with predefined keyword sets for each category using fuzzy string comparison.
+
+3. **ML Model Fallback**  
+   If keyword matching is inconclusive or below a confidence threshold, the system falls back to a trained machine learning model (a Naive Bayes classifier with TF-IDF features) to predict the category.
+
+4. **Return Result**  
+   The application returns the predicted category.
+
+This two-tiered approach increases reliability by favoring simple, interpretable logic first, then falling back to the model when needed.
+
+### Add Category Flow
+
+When a new category is submitted via the `/add_category` endpoint, the application performs the following steps:
+
+1. **Receive Category Data**  
+   The request includes a category name, a list of keywords (used for fuzzy matching), and one or more example documents for training.
+
+2. **Store Keywords**  
+   The keywords are saved to an internal mapping used by the fuzzy matcher during classification.
+
+3. **Retrain Model**  
+   The example documents are vectorized and appended to the training dataset. The TF-IDF vectorizer and Naive Bayes model are retrained with the updated data.
+
+4. **Update Model Files**  
+   The updated model and vectorizer are saved to disk (`src/models/model.pkl` and `vectorizer.pkl`) for immediate use in subsequent classifications.
 
 
-## 🌐 Deployment on Render
+### File Structure & Key Components
 
-This application is deployed on Render and can be accessed at: [https://document-classifier-b3k7.onrender.com](https://document-classifier-b3k7.onrender.com).
+Below is a quick overview of the most relevant files and directories:
 
-Please note that this deployment might experience slower initial loading times due to the free tier. Performance with larger files may also be limited.
+- **`app.py`**  
+  The main Flask application. Defines routes for uploading, classifying, and extending categories via API.
 
-Future improvements to the deployment strategy are discussed in the "Future Considerations" section.
+- **`classifier.py`**  
+  Contains the core logic for file classification, including text extraction from different file types, fuzzy matching with predefined keywords, and using a machine learning model for classification when necessary.
 
----
+- **`train.py`**  
+  A standalone script used to train the initial machine learning model from labeled text documents.
+
+- **`src/models/`**  
+  Contains the saved `model.pkl` and `vectorizer.pkl` which are generated by train.py and used by the application for classification..
+
+- **`training_docs/`**  
+  Includes sample training documents organized by category (e.g., invoices, bank statements).
+
+- **`Dockerfile`**  
+  Defines the container configuration to run the app in an isolated Docker environment.
+
+  
 
 ## 🔮 Future Considerations
 
@@ -74,84 +140,3 @@ Here are some potential areas for future development:
 -   **Deployment Improvements**: Explore more robust and scalable deployment options beyond the Render free tier (as mentioned earlier), such as cloud platforms with better resource management.
 -   **User Authentication**: Add user accounts and authentication for managing categories and data.
 -   **More Granular Keyword Control**: Allow users to specify the matching sensitivity for keywords.
-
----
-
-
-
-# Heron Coding Challenge - File Classifier
-
-## Overview
-
-At Heron, we’re using AI to automate document processing workflows in financial services and beyond. Each day, we handle over 100,000 documents that need to be quickly identified and categorised before we can kick off the automations.
-
-This repository provides a basic endpoint for classifying files by their filenames. However, the current classifier has limitations when it comes to handling poorly named files, processing larger volumes, and adapting to new industries effectively.
-
-**Your task**: improve this classifier by adding features and optimisations to handle (1) poorly named files, (2) scaling to new industries, and (3) processing larger volumes of documents.
-
-This is a real-world challenge that allows you to demonstrate your approach to building innovative and scalable AI solutions. We’re excited to see what you come up with! Feel free to take it in any direction you like, but we suggest:
-
-
-### Part 1: Enhancing the Classifier
-
-- What are the limitations in the current classifier that's stopping it from scaling?
-- How might you extend the classifier with additional technologies, capabilities, or features?
-
-
-### Part 2: Productionising the Classifier 
-
-- How can you ensure the classifier is robust and reliable in a production environment?
-- How can you deploy the classifier to make it accessible to other services and users?
-
-We encourage you to be creative! Feel free to use any libraries, tools, services, models or frameworks of your choice
-
-### Possible Ideas / Suggestions
-- Train a classifier to categorize files based on the text content of a file
-- Generate synthetic data to train the classifier on documents from different industries
-- Detect file type and handle other file formats (e.g., Word, Excel)
-- Set up a CI/CD pipeline for automatic testing and deployment
-- Refactor the codebase to make it more maintainable and scalable
-
-## Marking Criteria
-- **Functionality**: Does the classifier work as expected?
-- **Scalability**: Can the classifier scale to new industries and higher volumes?
-- **Maintainability**: Is the codebase well-structured and easy to maintain?
-- **Creativity**: Are there any innovative or creative solutions to the problem?
-- **Testing**: Are there tests to validate the service's functionality?
-- **Deployment**: Is the classifier ready for deployment in a production environment?
-
-
-## Getting Started
-1. Clone the repository:
-    ```shell
-    git clone <repository_url>
-    cd heron_classifier
-    ```
-
-2. Install dependencies:
-    ```shell
-    python -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
-
-3. Run the Flask app:
-    ```shell
-    python -m src.app
-    ```
-
-4. Test the classifier using a tool like curl:
-    ```shell
-    curl -X POST -F 'file=@path_to_pdf.pdf' http://127.0.0.1:5000/classify_file
-    ```
-
-5. Run tests:
-   ```shell
-    pytest
-    ```
-
-## Submission
-
-Please aim to spend 3 hours on this challenge.
-
-Once completed, submit your solution by sharing a link to your forked repository. Please also provide a brief write-up of your ideas, approach, and any instructions needed to run your solution. 

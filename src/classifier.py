@@ -75,7 +75,6 @@ def classify_text(text):
     for category, keywords in categories.items():
         for keyword in keywords:
             if any(fuzzy_match(line, keyword) for line in text.splitlines()):
-                print(f"fuzzy match {category}")
                 return category
 
     return "unknown file"
@@ -105,6 +104,5 @@ def classify_file(file: FileStorage):
 
     label = classify_text(text)
     if label == "unknown file":
-        print("fall back to ML")
         label = ml_classify_text(text)
     return label

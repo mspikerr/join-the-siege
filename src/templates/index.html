@@ -101,6 +101,12 @@
   <h1>File Classifier</h1>
 
   <div class="container">
+    <!-- Available Categories at the top -->
+    <h2>Available Categories</h2>
+    <ul id="category-list">
+      <li>Loading...</li>
+    </ul> 
+  
     <!-- File Classifier Form -->
     <h2>Upload Files to Classify</h2>
     <form action="/classify_file" method="post" enctype="multipart/form-data">
@@ -109,6 +115,7 @@
       </div>
       <button type="submit">Upload and Classify</button>
     </form>
+  
 
     <!-- Results Section -->
     {% if results %}
@@ -171,6 +178,61 @@
       }
     };
   </script>
+
+<script>
+  document.getElementById('addCategoryForm').onsubmit = async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/add_category", {
+        method: "POST",
+        body: formData
+      });
+
+      const text = await response.text();
+      document.getElementById("message").textContent = text;
+      form.reset();  // optional: clear the form
+
+      // Reload categories after new one is added
+      loadCategories();
+    } catch (err) {
+      document.getElementById("message").textContent = "Error submitting form.";
+      document.getElementById("message").className = "error";
+    }
+  };
+
+  // Fetch and render categories
+  async function loadCategories() {
+    const list = document.getElementById("category-list");
+    list.innerHTML = "<li>Loading...</li>";
+
+    try {
+      const response = await fetch("/categories");
+      const data = await response.json();
+
+      list.innerHTML = "";
+      if (data.categories && data.categories.length > 0) {
+        data.categories.forEach(category => {
+          const li = document.createElement("li");
+          li.textContent = category;
+          list.appendChild(li);
+        });
+      } else {
+        list.innerHTML = "<li>No categories found.</li>";
+      }
+    } catch (error) {
+      console.error("Error loading categories:", error);
+      list.innerHTML = "<li>Error loading categories.</li>";
+    }
+  }
+
+  // Load categories on page load
+  window.onload = loadCategories;
+</script>
+
 
 </body>
 </html>

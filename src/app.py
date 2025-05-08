@@ -6,8 +6,17 @@ import subprocess
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from src.classifier import save_category
+from src.classifier import load_categories
 
 app = Flask(__name__)
+
+@app.route("/categories", methods=["GET"])
+def get_categories():
+    try:
+        categories = load_categories()
+        return jsonify({"categories": list(categories.keys())})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 TRAINING_DIR = "training_docs"
 
