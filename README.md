@@ -38,6 +38,7 @@ Assuming you have a file named `example.pdf` in your current directory:
 
 ```bash
 curl -F "file=@example.pdf" http://localhost:5000/classify_file
+```
 
 **Using `curl` to add a category from your host machine**:
 
@@ -49,6 +50,7 @@ curl -X POST http://localhost:5000/add_category \
   -F 'keywords=["agreement", "terms", "signature", "clause"]' \
   -F "files=@contract_example1.txt" \
   -F "files=@contract_example2.txt"
+  ```
 
 
 ## 🌐 Deployment on Render
