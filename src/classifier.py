@@ -29,7 +29,10 @@ def extract_text_from_pdf(file_bytes):
 
 def extract_text_from_image(file_bytes):
     image = Image.open(io.BytesIO(file_bytes))
-    return pytesseract.image_to_string(image, timeout=10)
+    # Resize image (reduce size while maintaining aspect ratio)
+    max_size = (1000, 1000)  # You can tweak this as needed
+    image.thumbnail(max_size, Image.LANCZOS)
+    return pytesseract.image_to_string(image)
 
 def extract_text_from_docx(file_bytes):
     doc = Document(io.BytesIO(file_bytes))
