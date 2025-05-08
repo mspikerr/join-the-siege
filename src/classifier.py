@@ -29,7 +29,7 @@ def extract_text_from_pdf(file_bytes):
 
 def extract_text_from_image(file_bytes):
     image = Image.open(io.BytesIO(file_bytes))
-    return pytesseract.image_to_string(image)
+    return pytesseract.image_to_string(image, timeout=10)
 
 def extract_text_from_docx(file_bytes):
     doc = Document(io.BytesIO(file_bytes))
@@ -65,12 +65,15 @@ def classify_text(text):
             continue
         for kw in driver_keywords:
             if fuzzy_match(line, kw):
+                print("fuzzy match drivers")
                 return "drivers_license"
         for kw in bank_keywords:
             if fuzzy_match(line, kw):
+                print("fuzzy match bank")
                 return "bank_statement"
         for kw in invoice_keywords:
             if fuzzy_match(line, kw):
+                print("fuzzy match invoice")
                 return "invoice"
 
     return "unknown file"
@@ -100,5 +103,6 @@ def classify_file(file: FileStorage):
 
     label = classify_text(text)
     if label == "unknown file":
+        print("fall back to ML")
         label = ml_classify_text(text)
     return label
