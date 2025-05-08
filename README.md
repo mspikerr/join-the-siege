@@ -17,9 +17,8 @@ Future improvements to the deployment strategy are discussed in the "Future Cons
 
 You can also run the application using Docker. Ensure you have Docker installed on your system.
 
-1.  **Build the Docker image**:
+1.  **Clone the repository**:
 
-    Clone the repository:
 
     ```bash
     git clone https://github.com/mspikerr/join-the-siege
@@ -126,6 +125,9 @@ Below is a quick overview of the most relevant files and directories:
 
 - **`Dockerfile`**  
   Defines the container configuration to run the app in an isolated Docker environment.
+
+- **`.github/workflows/python-ci.yml`** 
+  Defines the GitHub Actions workflow for running tests on every push or pull request to the `main` branch, ensuring code quality through automated CI.
 
   
 
