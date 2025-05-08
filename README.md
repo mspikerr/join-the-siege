@@ -1,3 +1,16 @@
+# Document Classifier 🧠📄
+
+![Python CI](https://github.com/mspikerr/join-the-siege/actions/workflows/python-ci.yml/badge.svg)
+[![Render](https://img.shields.io/badge/deployed-on%20Render-00c7d4)](https://document-classifier-b3k7.onrender.com)
+
+A Flask-based document classification app with ML and OCR support.
+
+
+
+
+
+
+
 # Heron Coding Challenge - File Classifier
 
 ## Overview

@@ -12,7 +12,6 @@ import os
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
-#TO DO: print statement to see if its actually falling back to ML
 # Load ML model and vectorizer
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "model.pkl")
@@ -64,21 +63,16 @@ def classify_text(text):
         line = line.strip()
         if not line:
             continue
-        print("LINE: ", line)
         for kw in driver_keywords:
             if fuzzy_match(line, kw):
-                print("fuzzy: drivers")
                 return "drivers_license"
         for kw in bank_keywords:
             if fuzzy_match(line, kw):
-                print("fuzzy: bank statement")
                 return "bank_statement"
         for kw in invoice_keywords:
             if fuzzy_match(line, kw):
-                print("fuzzy: invoice")
                 return "invoice"
 
-    print("no fuzzy match, returning unknown")
     return "unknown file"
 
 def ml_classify_text(text):
@@ -95,7 +89,6 @@ def classify_file(file: FileStorage):
         text = extract_text_from_pdf(file_bytes)
     elif mime_type.startswith("image/"):
         text = extract_text_from_image(file_bytes)
-        print("THIS IS WHAT OCR OUTPUTS:", text)
     elif filename.endswith(".docx"):
         text = extract_text_from_docx(file_bytes)
     elif filename.endswith(".xlsx"):
@@ -107,6 +100,5 @@ def classify_file(file: FileStorage):
 
     label = classify_text(text)
     if label == "unknown file":
-        print("falling back to ML model")
         label = ml_classify_text(text)
     return label

@@ -2,28 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>File Classifier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f6;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-inputs {
+      margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f4f7f6;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .results {
+      margin-top: 20px;
+    }
+
+    .results ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .results li {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .results li:last-child {
+      border-bottom: none;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+  </style>
 </head>
 <body>
-  <h1>Upload Files to Classify</h1>
-  <form action="/classify_file" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" multiple required>
-    <button type="submit">Upload</button>
-  </form>
 
-  {% if results %}
-    <h2>Results:</h2>
-    <ul>
-      {% for result in results %}
-        <li>
-          {% if result.error %}
-            Error: {{ result.error }}
-          {% else %}
-            {{ result.file_name }} → {{ result.file_class }}
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  {% endif %}
+  <h1>File Classifier</h1>
+
+  <div class="container">
+    <h2>Upload Files to Classify</h2>
+    <form action="/classify_file" method="post" enctype="multipart/form-data">
+      <div class="file-inputs">
+        <input type="file" name="file" multiple required>
+      </div>
+
+      <button type="submit">Upload and Classify</button>
+    </form>
+
+    {% if results %}
+      <div class="results">
+        <h3>Classification Results:</h3>
+        <ul>
+          {% for result in results %}
+            <li>
+              {% if result.error %}
+                <span class="error">Error: {{ result.error }}</span>
+              {% else %}
+                <span class="success">{{ result.file_name }} → {{ result.file_class }}</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+
 </body>
 </html>
