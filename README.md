@@ -28,7 +28,6 @@ You can also run the application using Docker. Ensure you have Docker installed 
 
 2.  **Build the Docker image**:
 
-    Navigate to the root directory of the project (where the `Dockerfile` is located) and run:
 
     ```bash
     docker build -t document-classifier .
@@ -66,9 +65,10 @@ You can also run the application using Docker. Ensure you have Docker installed 
 
     Make sure the files you're referencing exist in your current directory when running the `curl` commands.
 
+
 ## Project Overview
 
-This project is a content-based document classification tool designed to automatically categorize uploaded files (PDFs, Word docs, text files, etc.) using a machine learning model trained on labeled text samples. This tool currently supports the following file types: PDF, PNG, JPG, TXT, DOCX, and XLSX. The application features a web interface and API endpoints that allow users to upload documents for classification, as well as extend the model by adding new categories with sample files and keywords. It is designed for rapid prototyping and easy deployment via Docker.
+This project is a content-based document classification tool designed to automatically categorize uploaded files using a machine learning model trained on labeled text samples. This tool currently supports the following file types: PDF, PNG, JPG, TXT, DOCX, and XLSX. The application features a web interface and API endpoints that allow users to upload documents for classification, as well as extend the model by adding new categories with sample files and keywords. It is designed for rapid prototyping and easy deployment via Docker.
 
 ### Classification Flow
 
@@ -129,14 +129,30 @@ Below is a quick overview of the most relevant files and directories:
 
   
 
-## 🔮 Future Considerations
+## Limitations and Future Considerations
 
-Here are some potential areas for future development:
+While the current version of this document classifier is functional, there are several areas where it can be improved. Below are some of the key limitations and future considerations:
 
--   **Improved Machine Learning Model**: Explore more advanced NLP models for better classification accuracy.
--   **More File Type Support**: Investigate support for additional document and image formats.
--   **User Interface Enhancements**: Improve the web UI for a more intuitive user experience.
--   **Scalability**: Implement features to handle a larger volume of documents and user requests more efficiently.
--   **Deployment Improvements**: Explore more robust and scalable deployment options beyond the Render free tier (as mentioned earlier), such as cloud platforms with better resource management.
--   **User Authentication**: Add user accounts and authentication for managing categories and data.
--   **More Granular Keyword Control**: Allow users to specify the matching sensitivity for keywords.
+### 1. **Improve Deployment Beyond Free Tier on Render**  
+The application is currently deployed using the free tier of [Render](https://render.com), which introduces limitations such as cold starts, limited uptime, and reduced compute power. Future improvements include moving to a more robust cloud platform or upgrading to a paid tier for improved reliability, performance, and autoscaling capabilities. Implementing CI/CD with GitHub Actions and potentially container orchestration with Kubernetes would further streamline and strengthen the deployment process.
+
+### 2. **Comprehensive Testing**  
+Beyond basic functional testing, more thorough unit and integration tests are needed. These should cover edge cases, different file formats, error handling, and performance under load. This will ensure the system is reliable and robust in real-world use cases.
+
+### 3. **Add Synthetic .txt Files for User to Skip Upload**  
+The current "add category" functionality requires users to upload `.txt` files manually. In the future, we could implement a feature that allows users to generate synthetic `.txt` files based on predefined templates or sample data. This would enable users to add categories without needing to manually upload files, streamlining the process.
+
+### 4. **Train with More Data and File Types**  
+The model is presently trained on a limited number of `.txt` files. To improve accuracy, the system should be trained on a broader, more diverse dataset that includes `.pdf`, `.docx`, `.xlsx`, and image-based documents. This will enhance generalization and allow for more accurate predictions across formats.
+
+### 5. **Confidence Score and Human Review Loop**  
+Introducing a confidence score for each classification would help surface uncertain predictions. Documents falling below a configurable confidence threshold could be flagged for human review, creating a feedback loop that enhances trust and allows users to refine or override the model’s decision.
+
+### 6. **Optimizing Performance for Large Files**  
+For scalability, the application will need better handling larger files or a higher volume of concurrent requests. This could involve asynchronous processing, chunked reads, or background task queues to avoid blocking the main thread and improve responsiveness.
+
+### 7. **Scalability and Load Balancing**  
+To support increased demand, future versions should incorporate horizontal scaling and load balancing, possibly through cloud-native platforms like AWS ECS, Google Cloud Run, or Kubernetes, to ensure the app performs well under concurrent usage.
+
+### 8. **Use LLMs or More Advanced NLP Models**  
+The current classification approach relies on traditional machine learning with a vectorizer and basic model. In the future, the system could be enhanced using more advanced NLP models like BERT, RoBERTa, or large language models (LLMs) such as GPT. These models can better capture semantic meaning and context, enabling more accurate classification — even for unseen or nuanced categories. LLMs could also enable zero-shot or few-shot classification without requiring retraining.
