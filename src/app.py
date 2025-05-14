@@ -26,8 +26,14 @@ def add_category():
     keywords = json.loads(request.form["keywords"])
     files = request.files.getlist("files")
 
-    # Save keywords
-    save_category(category_name, keywords)
+    conflicts = save_category(category_name, keywords)
+
+    # If there are any conflicts, return them and do not proceed
+    if conflicts:
+        return jsonify({
+            "error": "Category is too similar to existing categories.",
+            "conflicts": conflicts
+        }), 400
 
     # Create new training_docs subfolder
     category_dir = os.path.join(TRAINING_DIR, secure_filename(category_name))

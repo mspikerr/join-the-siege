@@ -94,13 +94,16 @@ When a new category is submitted via the `/add_category` endpoint, the applicati
 1. **Receive Category Data**  
    The request includes a category name, a list of keywords (used for fuzzy matching), and one or more example documents for training.
 
-2. **Store Keywords**  
-   The keywords are saved to an internal mapping used by the fuzzy matcher during classification.
+2. **Check for Similarity Conflicts**  
+   Before saving, the system checks whether the submitted category name or any of its keywords are too similar to existing ones using fuzzy matching. If conflicts are found, the request is rejected with a list of specific conflicts and no changes are made.
 
-3. **Retrain Model**  
+3. **Store Keywords**  
+   If no conflicts are found, the keywords are saved to an internal mapping used by the fuzzy matcher during classification.
+
+4. **Retrain Model**  
    The example documents are vectorized and appended to the training dataset. The TF-IDF vectorizer and Naive Bayes model are retrained with the updated data.
 
-4. **Update Model Files**  
+5. **Update Model Files**  
    The updated model and vectorizer are saved to disk (`src/models/model.pkl` and `vectorizer.pkl`) for immediate use in subsequent classifications.
 
 
@@ -142,7 +145,7 @@ The application is currently deployed using the free tier of [Render](https://re
 Beyond basic functional testing, more thorough unit and integration tests are needed. These should cover edge cases, different file formats, error handling, and performance under load. This will ensure the system is reliable and robust in real-world use cases.
 
 ### 3. **Add Synthetic .txt Files for User to Skip Upload**  
-The current "add category" functionality requires users to upload `.txt` files manually. In the future, we could implement a feature that allows users to generate synthetic `.txt` files based on predefined templates or sample data. This would enable users to add categories without needing to manually upload files, streamlining the process.
+The current "add category" functionality requires users to upload `.txt` files manually. In the future, it could support generating synthetic `.txt` files from predefined templates or sample data, allowing users to add categories without needing to manually upload files, streamlining the process.
 
 ### 4. **Train with More Data and File Types**  
 The model is presently trained on a limited number of `.txt` files. To improve accuracy, the system should be trained on a broader, more diverse dataset that includes `.pdf`, `.docx`, `.xlsx`, and image-based documents. This will enhance generalization and allow for more accurate predictions across formats.

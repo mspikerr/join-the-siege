@@ -32,10 +32,15 @@ def load_categories():
 
 def save_category(name, keywords):
     """Save a new category to the categories.json file."""
+    conflicts = fuzzy_match_category(name, keywords)
+    if conflicts:
+        return conflicts
+
     categories = load_categories()
     categories[name] = keywords
     with open(CATEGORY_FILE, "w") as f:
         json.dump(categories, f, indent=4)
+    return None
 
 def extract_text_from_pdf(file_bytes):
     with open("temp.pdf", "wb") as f:
@@ -64,7 +69,28 @@ def extract_text_from_xlsx(file_bytes):
 
 def fuzzy_match(text, keyword, threshold=80):
     score = fuzz.token_set_ratio(text, keyword)
+    print(score)
     return score >= threshold
+
+def fuzzy_match_category(new_category_name, new_keywords, threshold = 80):
+    categories = load_categories()
+    conflicts = []
+
+    #first, lets check for similarities in category names
+
+    for current_cat, current_keywords in categories.items(): 
+        if fuzzy_match(new_category_name, current_cat, threshold=70):
+            conflicts.append( f"Category name '{new_category_name}' is too similar to existing category '{current_cat}'")
+
+    #next, lets check for similarities in keywords 
+    for new_keyword in new_keywords:
+        for current_cat, current_keywords in categories.items():
+            for current_keyword in current_keywords:
+                if fuzzy_match(new_keyword, current_keyword, threshold=80):
+                    conflicts.append(f"Keyword '{new_keyword}' is too similar to '{current_keyword}' in category '{current_cat}'")
+    
+    return conflicts
+
 
 def classify_text(text):
     text = text.lower()
